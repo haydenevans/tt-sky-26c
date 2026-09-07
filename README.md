@@ -1,6 +1,10 @@
 ![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg) ![](../../workflows/fpga/badge.svg)
 
-# Tiny Tapeout Verilog Project Template
+# Systolic Processing Element
+
+## Overview
+
+This project is a weight-stationary processing element (PE) implementing the core compute primitive of a systolic array neural network accelerator. The design features a 3-stage pipeline: int8 multiply-accumulate, bias addition, and Leaky ReLU activation (β=0.25).
 
 - [Read the documentation for project](docs/info.md)
 
