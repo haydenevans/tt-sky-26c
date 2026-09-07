@@ -1,12 +1,18 @@
-import numpy as np
-
 def to_int8(value):
     """Saturate and cast to int8 range [-128, 127]"""
-    return int(np.clip(value, -128, 127))
+    if value < -128:
+        return -128
+    if value > 127:
+        return 127
+    return int(value)
 
 def to_int16(value):
-    """Cast to int16 range for accumulator"""
-    return int(np.clip(value, -32768, 32767))
+    """Cast to int16 range for accumulator [-32768, 32767]"""
+    if value < -32768:
+        return -32768
+    if value > 32767:
+        return 32767
+    return int(value)
 
 def leaky_relu_int8(value, beta_shift=2):
     """
@@ -18,7 +24,7 @@ def leaky_relu_int8(value, beta_shift=2):
     if value >= 0:
         return value
     else:
-        # Arithmetic right shift (preserves sign)
+        # Arithmetic right shift (preserves sign in Python)
         return value >> beta_shift
 
 def pe_compute(weight, activation, bias, beta_shift=2):
@@ -59,13 +65,23 @@ def pe_compute(weight, activation, bias, beta_shift=2):
     }
 
 def generate_test_vectors(n=1000, seed=42):
-    """Generate random test vectors for verification"""
-    np.random.seed(seed)
+    """Generate random test vectors using a zero-import Linear Congruential Generator"""
+    # LCG constants (Numerical Recipes parameters)
+    state = seed
+    a = 1664525
+    c = 1013904223
+    m = 2**32
+    
     vectors = []
     for _ in range(n):
-        weight = np.random.randint(-128, 128)
-        activation = np.random.randint(-128, 128)
-        bias = np.random.randint(-128, 128)
+        vals = []
+        for _ in range(3):  # We need 3 random values per iteration
+            state = (a * state + c) % m
+            # Scale 32-bit unsigned int to signed int8 [-128, 127]
+            val = (state % 256) - 128
+            vals.append(val)
+            
+        weight, activation, bias = vals
         result = pe_compute(weight, activation, bias)
         vectors.append({
             'weight': weight,
