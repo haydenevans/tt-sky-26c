@@ -29,6 +29,7 @@ On each accumulate pulse, the chip multiplies the stationary weight register (in
 One cycle after Stage 1, the accumulated MAC result is added to the bias register (int8, sign-extended to 17 bits). The result is saturated to int16 range. Bias allows neurons to activate independently of the dot product magnitude, shifting the activation function threshold. This stage is pipelined separately from Stage 1 to keep each stage's critical combinational path short and allow higher clock frequencies.
 
 **Stage 3: Leaky ReLU Activation and int8 Saturation**
+
 One cycle after Stage 2, the activation function is applied. The sign bit of the 16-bit biased result is tested: if positive, the value passes through unchanged; if negative, it is arithmetically right-shifted by 2 positions (dividing by 4, equivalent to multiplying by β=0.25). This is Leaky ReLU with β=0.25, implemented using only wiring — zero additional gates, accomplished by arithmetic shift. The result is then saturated to int8 range (−128 to +127) before appearing on uo_out. The overflow flag records whether saturation occurred.
 
 **Bit-Width Progression**
